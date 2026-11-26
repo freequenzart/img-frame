@@ -1,8 +1,10 @@
 # img-frame
 
 Ein schlanker Browser-Kiosk auf Raspberry Pi OS Lite: kein Desktop, nur X11,
-ein minimaler Fenstermanager und Chromium im Vollbild. Ausgangspunkt ist deine
+ein minimaler Fenstermanager und Chromium im Vollbild. Ausgangspunkt ist diese
 [Smart-Mirror-Anleitung](https://github.com/freequenzart/Smart-Mirror-with-Home-Assistant).
+
+Repository: [freequenzart/img-frame](https://github.com/freequenzart/img-frame).
 
 Zielhardware: Raspberry Pi Zero 2 W und neuere Modelle. Unterstuetzt werden
 32 Bit (`armhf`) und 64 Bit (`arm64`). Fuer die 512 MB RAM des Zero 2 W bleibt
@@ -26,7 +28,14 @@ werden nicht unterstuetzt.
 
 1. Raspberry Pi OS Lite (32 oder 64 Bit), Trixie oder Bookworm, auf die SD-Karte schreiben.
    Mit Raspberry Pi Imager eigenen Admin-Benutzer und WLAN einrichten; SSH nur bei Bedarf aktivieren.
-2. Pi starten und dieses Projekt vollstaendig auf den Pi kopieren, z.B. nach `~/img-frame`.
+2. Pi starten, als Admin anmelden und das Repository herunterladen:
+
+  ```bash
+  sudo apt update
+  sudo apt install -y git
+  git clone https://github.com/freequenzart/img-frame.git "$HOME/img-frame"
+  ```
+
 3. Als Admin ausfuehren:
 
    ```bash
@@ -86,9 +95,14 @@ genuegend freiem Speicher (mehrere zehn GB) und den
 Nicht auf NTFS bauen. Builds unter x86-Linux mit QEMU/Docker sind moeglich, aber von
 pi-gen nicht als native Build-Umgebung unterstuetzt und hier nicht verifiziert.
 
-Auf dem Linux-Build-Rechner:
+Auf dem Linux-Build-Rechner Git installieren und das Projekt klonen.
+Falls es bereits unter `~/img-frame` vorhanden ist, den Clone-Schritt auslassen:
 
 ```bash
+sudo apt update
+sudo apt install -y git
+git clone https://github.com/freequenzart/img-frame.git "$HOME/img-frame"
+cd "$HOME/img-frame"
 bash image/prepare.sh "$HOME/pi-gen-img-frame" auto
 cd "$HOME/pi-gen-img-frame"
 read -rsp 'Eigenes Passwort fuer frameadmin: ' IMG_FRAME_ADMIN_PASSWORD
@@ -114,6 +128,7 @@ Die explizite Auswahl richtet keine zusaetzliche Cross-Build-/QEMU-Umgebung ein.
 Beide Varianten lassen sich unabhaengig in getrennten Verzeichnissen vorbereiten:
 
 ```bash
+cd "$HOME/img-frame"
 bash image/prepare.sh "$HOME/pi-gen-img-frame-armhf" armhf
 bash image/prepare.sh "$HOME/pi-gen-img-frame-arm64" arm64
 ```
@@ -148,6 +163,20 @@ eine Netzwerkfehlerseite zeigt, nach erfolgreicher Netzwerkeinrichtung die Sitzu
 spaeterer Ausfaelle des Zielservers oder eine automatische Seitenaktualisierung ist nicht enthalten.
 
 ## Grenzen und Wartung
+
+Projektdateien auf dem Pi aktualisieren und den Installer erneut ausfuehren:
+
+```bash
+cd "$HOME/img-frame"
+git pull --ff-only
+sudo bash install.sh
+sudo reboot
+```
+
+Die gespeicherte URL und das Browserprofil bleiben erhalten. Bei eigenen lokalen
+Aenderungen diese vor dem Update pruefen; `--ff-only` verhindert automatische
+Merge-Commits und ueberschreibt keine lokalen Aenderungen. Ein bereits gebautes
+SD-Karten-Image wird dadurch nicht aktualisiert; dafuer einen neuen Build vorbereiten.
 
 - Ein echter Boot- und Hardwaretest auf Zero 2 W und neueren Modellen steht noch aus.
   Auch die kompletten pi-gen-Builds fuer 32 und 64 Bit muessen auf Linux verifiziert werden.
