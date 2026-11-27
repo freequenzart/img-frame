@@ -13,6 +13,16 @@ more memory. Complex websites and Home Assistant dashboards may exceed the
 available memory. First-generation Raspberry Pi Zero / Zero W models are not
 supported.
 
+## Table of Contents
+
+- [Behavior](#behavior)
+- [Quick Start on a Pi](#quick-start-on-a-pi)
+- [Changing the URL Later](#changing-the-url-later)
+- [Building a Custom SD Card Image](#building-a-custom-sd-card-image)
+- [Tested Setup and Wi-Fi Note](#tested-setup-and-wi-fi-note)
+- [Limitations and Maintenance](#limitations-and-maintenance)
+- [Tests](#tests)
+
 ## Behavior
 
 - On the first kiosk start, a URL prompt appears on the text console.
@@ -31,15 +41,27 @@ supported.
 
 1. Write Raspberry Pi OS Lite (32-bit or 64-bit), Trixie or Bookworm, to the SD card.
    Use Raspberry Pi Imager to configure your own admin account and Wi-Fi; enable SSH only if needed.
-2. Start the Pi, sign in as the admin user, and clone the repository:
+2. Start the Pi, sign in as the admin user, and update the system before installing the kiosk:
 
   ```bash
   sudo apt update
+  sudo apt upgrade
+  sudo reboot
+  ```
+
+  Review the proposed package changes before confirming. `apt upgrade` updates
+  packages without removing existing ones. `apt full-upgrade` can also remove
+  packages to resolve dependency changes and is not required just to install the
+  kiosk. This is a recommended preparation step, not an automatic installer action.
+
+3. After the reboot, sign in again and clone the repository:
+
+  ```bash
   sudo apt install -y git
   git clone https://github.com/freequenzart/img-frame.git "$HOME/img-frame"
   ```
 
-3. Run as the admin user:
+4. Run as the admin user:
 
    ```bash
    cd ~/img-frame
@@ -47,7 +69,7 @@ supported.
    sudo reboot
    ```
 
-4. Enter the URL using the connected keyboard. The kiosk then starts.
+5. Enter the URL using the connected keyboard. The kiosk then starts.
 
 The installer requires internet access to download packages. It reserves the `kiosk`
 user, that user's login profile, and automatic login on console 1 for the kiosk.
