@@ -8,6 +8,7 @@ xset s noblank
 unclutter -idle 1 -root &
 matchbox-window-manager -use_titlebar no &
 exec chromium \
+    --no-memcheck \
     --kiosk \
     --no-first-run \
     --no-default-browser-check \

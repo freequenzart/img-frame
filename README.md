@@ -1,34 +1,37 @@
 # img-frame
 
-Ein schlanker Browser-Kiosk auf Raspberry Pi OS Lite: kein Desktop, nur X11,
-ein minimaler Fenstermanager und Chromium im Vollbild. Ausgangspunkt ist diese
-[Smart-Mirror-Anleitung](https://github.com/freequenzart/Smart-Mirror-with-Home-Assistant).
+A lightweight browser kiosk based on Raspberry Pi OS Lite: no desktop, just X11,
+a minimal window manager, and Chromium in fullscreen mode. Based on this
+[Smart Mirror guide](https://github.com/freequenzart/Smart-Mirror-with-Home-Assistant).
 
 Repository: [freequenzart/img-frame](https://github.com/freequenzart/img-frame).
 
-Zielhardware: Raspberry Pi Zero 2 W und neuere Modelle. Unterstuetzt werden
-32 Bit (`armhf`) und 64 Bit (`arm64`). Fuer die 512 MB RAM des Zero 2 W bleibt
-32 Bit die Empfehlung; 64 Bit ist auch dort moeglich, benoetigt aber tendenziell
-mehr Arbeitsspeicher. Aufwendige Webseiten und Home-Assistant-Dashboards koennen
-an die Speichergrenze stossen. Raspberry Pi Zero / Zero W der ersten Generation
-werden nicht unterstuetzt.
+Target hardware: Raspberry Pi Zero 2 W and newer models. Both 32-bit (`armhf`)
+and 64-bit (`arm64`) systems are supported. For the Zero 2 W with its 512 MB of
+RAM, 32-bit remains the recommended choice; 64-bit is possible but tends to use
+more memory. Complex websites and Home Assistant dashboards may exceed the
+available memory. First-generation Raspberry Pi Zero / Zero W models are not
+supported.
 
-## Verhalten
+## Behavior
 
-- Beim ersten Kiosk-Start erscheint eine URL-Abfrage auf der Textkonsole.
-  Dafuer wird eine USB-Tastatur benoetigt, kein Touchscreen-Setup.
-- Beispiel: `http://homeassistant.local:8123/dashboard-mirror/0`.
-- Anschliessend startet der Browser; die Adresse bleibt nach Neustarts erhalten.
-- Bei spaeteren Starts erscheint direkt der Browser. Mauszeiger und Bildschirmschoner
-  werden ausgeblendet. Nach dem Beenden oder Absturz startet der Browser erneut.
-- Browserprofil und Anmeldungen bleiben gespeichert. Chromium laeuft nicht als root;
-  seine Sandbox bleibt aktiviert. Es wird kein zusaetzlicher Konfigurations-Webserver gestartet.
+- On the first kiosk start, a URL prompt appears on the text console.
+  A USB keyboard is required; there is no touchscreen setup interface.
+- Example: `http://homeassistant.local:8123/dashboard-mirror/0`.
+- The browser then starts, and the address is preserved across reboots.
+- On subsequent starts, the browser opens directly. The mouse pointer is hidden
+  and the screensaver is disabled. The browser restarts if it exits or crashes.
+- The browser profile and login sessions are preserved. Chromium does not run as
+  root, and its sandbox remains enabled. No additional configuration web server is started.
+- The Raspberry Pi Chromium launcher's RAM warning ("less than 1GB of RAM")
+  is skipped in kiosk mode using `--no-memcheck`. This only suppresses the dialog;
+  it does not increase available memory or disable the sandbox.
 
-## Schnellstart auf einem Pi
+## Quick Start on a Pi
 
-1. Raspberry Pi OS Lite (32 oder 64 Bit), Trixie oder Bookworm, auf die SD-Karte schreiben.
-   Mit Raspberry Pi Imager eigenen Admin-Benutzer und WLAN einrichten; SSH nur bei Bedarf aktivieren.
-2. Pi starten, als Admin anmelden und das Repository herunterladen:
+1. Write Raspberry Pi OS Lite (32-bit or 64-bit), Trixie or Bookworm, to the SD card.
+   Use Raspberry Pi Imager to configure your own admin account and Wi-Fi; enable SSH only if needed.
+2. Start the Pi, sign in as the admin user, and clone the repository:
 
   ```bash
   sudo apt update
@@ -36,7 +39,7 @@ werden nicht unterstuetzt.
   git clone https://github.com/freequenzart/img-frame.git "$HOME/img-frame"
   ```
 
-3. Als Admin ausfuehren:
+3. Run as the admin user:
 
    ```bash
    cd ~/img-frame
@@ -44,59 +47,59 @@ werden nicht unterstuetzt.
    sudo reboot
    ```
 
-4. Die URL an der angeschlossenen Tastatur eingeben. Danach startet der Kiosk.
+4. Enter the URL using the connected keyboard. The kiosk then starts.
 
-Der Installer benoetigt Internet fuer die Pakete. Er reserviert den Benutzer `kiosk`
-und dessen Login-Profil sowie die automatische Anmeldung auf Konsole 1 fuer den Kiosk.
-Ein vorhandenes Login-Profil wird einmalig gesichert. Verwende deshalb einen anderen
-Benutzernamen fuer deinen Admin. Bestehende URL und Browserdaten bleiben bei erneuter
-Installation erhalten. Das Skript aendert keine WLAN-Zugangsdaten oder Grafiktreiber.
-Die Pakete werden durch `apt` automatisch passend zur installierten OS-Architektur
-ausgewaehlt; es ist kein separater 64-Bit-Installer notwendig.
+The installer requires internet access to download packages. It reserves the `kiosk`
+user, that user's login profile, and automatic login on console 1 for the kiosk.
+An existing login profile is backed up once. Use a different username for your admin
+account. Reinstalling preserves the existing URL and browser data. The script does
+not change Wi-Fi credentials or graphics drivers. `apt` automatically selects packages
+for the installed OS architecture; no separate 64-bit installer is required.
 
-## URL spaeter aendern
+## Changing the URL Later
 
-Per SSH als Admin oder lokal mit `Strg+Alt+F2` anmelden:
+Sign in as the admin user via SSH, or locally by pressing `Ctrl+Alt+F2`:
 
 ```bash
 sudo img-frame-config --restart
 ```
 
-Alternativ die neue Adresse direkt setzen:
+Alternatively, set the new address directly:
 
 ```bash
 sudo img-frame-config --set 'http://192.168.1.50:8123/dashboard-mirror/0' --restart
 ```
 
-`Strg+Alt+F1` wechselt zurueck zum Kiosk. `--restart` beendet die komplette laufende
-Kiosk-Sitzung, auch auf Konsole 1. Ohne diese Option wird die URL erst beim naechsten
-Kiosk-Start uebernommen. Eine leere Eingabe behaelt die vorhandene Adresse.
+Press `Ctrl+Alt+F1` to return to the kiosk. `--restart` terminates and restarts the
+entire running kiosk session, including on console 1. Without this option, the new
+URL takes effect on the next kiosk start. An empty input keeps the current address.
 
 ```bash
 sudo img-frame-config --get
 sudo img-frame-config --reset --restart
 ```
 
-`--reset` stellt nur die URL-Abfrage wieder her und loescht keine Browser-Anmeldung.
-Die URL liegt in `/var/lib/img-frame/config.json`, das Profil unter
-`/home/kiosk/.config/img-frame/chromium`. URLs duerfen keine eingebetteten Zugangsdaten
-enthalten. Fuer Home Assistant direkt im Browser einen eigenen eingeschraenkten Benutzer anmelden.
+`--reset` only restores the URL prompt; it does not clear browser login sessions.
+The URL is stored in `/var/lib/img-frame/config.json`, and the browser profile in
+`/home/kiosk/.config/img-frame/chromium`. URLs must not contain embedded credentials.
+For Home Assistant, sign in directly in the browser using a dedicated account with
+limited permissions.
 
-## Eigenes SD-Karten-Image bauen
+## Building a Custom SD Card Image
 
-Die beiliegende Stufe erweitert die offizielle Raspberry-Pi-OS-Lite-Stufe (`stage2`)
-von [pi-gen](https://github.com/RPi-Distro/pi-gen). Sie erzeugt eine `.img.xz` im
-Verzeichnis `deploy`. Hier im Windows-Arbeitsbereich wurde noch kein Image gebaut.
+The included stage extends the official Raspberry Pi OS Lite stage (`stage2`)
+from [pi-gen](https://github.com/RPi-Distro/pi-gen). It produces an `.img.xz` file
+in the `deploy` directory. No image has been built in this Windows workspace yet.
 
-Empfohlen: ein dedizierter Raspberry Pi als Build-Rechner, mit Raspberry Pi OS
-passend zur Zielarchitektur (32 Bit fuer `armhf`, 64 Bit fuer `arm64`),
-genuegend freiem Speicher (mehrere zehn GB) und den
-[aktuellen pi-gen-Build-Abhaengigkeiten](https://github.com/RPi-Distro/pi-gen#dependencies).
-Nicht auf NTFS bauen. Builds unter x86-Linux mit QEMU/Docker sind moeglich, aber von
-pi-gen nicht als native Build-Umgebung unterstuetzt und hier nicht verifiziert.
+Recommended: a dedicated Raspberry Pi as the build machine, running Raspberry Pi OS
+matching the target architecture (32-bit for `armhf`, 64-bit for `arm64`),
+with sufficient free disk space (several tens of GB) and the
+[current pi-gen build dependencies](https://github.com/RPi-Distro/pi-gen#dependencies).
+Do not build on NTFS. Builds on x86 Linux using QEMU/Docker are possible, but are
+not supported by pi-gen as native builds and have not been verified here.
 
-Auf dem Linux-Build-Rechner Git installieren und das Projekt klonen.
-Falls es bereits unter `~/img-frame` vorhanden ist, den Clone-Schritt auslassen:
+Install Git on the Linux build machine and clone the project.
+If it already exists at `~/img-frame`, skip the clone command:
 
 ```bash
 sudo apt update
@@ -105,27 +108,27 @@ git clone https://github.com/freequenzart/img-frame.git "$HOME/img-frame"
 cd "$HOME/img-frame"
 bash image/prepare.sh "$HOME/pi-gen-img-frame" auto
 cd "$HOME/pi-gen-img-frame"
-read -rsp 'Eigenes Passwort fuer frameadmin: ' IMG_FRAME_ADMIN_PASSWORD
+read -rsp 'Choose your own password for frameadmin: ' IMG_FRAME_ADMIN_PASSWORD
 echo
 export IMG_FRAME_ADMIN_PASSWORD
 sudo --preserve-env=IMG_FRAME_ADMIN_PASSWORD ./build.sh
 unset IMG_FRAME_ADMIN_PASSWORD
 ```
 
-Die Architekturwahl erfolgt ueber das zweite Argument:
+Select the architecture using the second argument:
 
-| Auswahl | Verhalten | pi-gen-Zweig | Image-Name |
+| Selection | Behavior | pi-gen Branch | Image Name |
 | --- | --- | --- | --- |
-| `auto` (Standard) | Installierte OS-Architektur des Build-Rechners ueber `dpkg` | passend zum OS | passend zum OS |
-| `armhf` | 32-Bit-Ziel | `master` | `img-frame-armhf` |
-| `arm64` | 64-Bit-Ziel | `arm64` | `img-frame-arm64` |
+| `auto` (default) | Installed OS architecture of the build machine, detected via `dpkg` | Matches the OS | Matches the OS |
+| `armhf` | 32-bit target | `master` | `img-frame-armhf` |
+| `arm64` | 64-bit target | `arm64` | `img-frame-arm64` |
 
-`auto` richtet sich bewusst nach dem Betriebssystem, nicht allein nach der CPU:
-Ein 32-Bit-OS auf einer 64-Bit-faehigen CPU waehlt `armhf`. Auf einem x86-Rechner
-lehnt `auto` die Auswahl ab; dort muss das ARM-Ziel explizit angegeben werden.
-Die explizite Auswahl richtet keine zusaetzliche Cross-Build-/QEMU-Umgebung ein.
+`auto` deliberately uses the operating system architecture, not just the CPU:
+a 32-bit OS on a 64-bit-capable CPU selects `armhf`. On an x86 machine, `auto`
+rejects the architecture; you must explicitly specify the ARM target instead.
+Explicit selection does not set up an additional cross-build or QEMU environment.
 
-Beide Varianten lassen sich unabhaengig in getrennten Verzeichnissen vorbereiten:
+Both variants can be prepared independently in separate directories:
 
 ```bash
 cd "$HOME/img-frame"
@@ -133,38 +136,76 @@ bash image/prepare.sh "$HOME/pi-gen-img-frame-armhf" armhf
 bash image/prepare.sh "$HOME/pi-gen-img-frame-arm64" arm64
 ```
 
-Den obigen `build.sh`-Aufruf anschliessend im jeweiligen Verzeichnis auf einer
-geeigneten Build-Umgebung ausfuehren. Ein vorhandenes Build-Verzeichnis wird nicht
-ueberschrieben. Es entstehen zwei getrennte Images, kein einzelnes Image, das beim
-Booten zwischen 32 und 64 Bit wechselt.
+Then run the `build.sh` command shown above in each directory using a suitable
+build environment. An existing build directory will not be overwritten. This
+produces two separate images, not a single image that switches between 32-bit
+and 64-bit at boot.
 
-Das Vorbereiten klont den aktuellen Stand des gewaehlten Zweigs und gibt dessen
-Commit-ID aus. Fuer wiederholbare Builds diesen Stand und die verwendeten
-Paketquellen festhalten; die Online-Paketquellen selbst sind nicht eingefroren.
+Preparation clones the current revision of the selected branch and prints its
+commit ID. For reproducible builds, record that revision and the package sources
+used; the online package repositories themselves are not frozen.
 
-Das fertige Image mit Imager ueber "Eigenes Image" flashen. Admin ist `frameadmin`
-mit deinem beim Build gewaehlten Passwort, SSH ist standardmaessig ausgeschaltet.
-Es gibt kein mitgeliefertes Standardpasswort. Dieses Image ist fuer den persoenlichen
-Gebrauch gedacht: nicht unveraendert mit demselben Admin-Passwort weiterverteilen.
-Fuer oeffentliche Releases waere eine eigene sichere Admin-Ersteinrichtung notwendig.
+Flash the finished image using "Use custom" in Raspberry Pi Imager. The admin user
+is `frameadmin`, with the password you chose during the build. SSH is disabled by
+default. No default password is provided. This image is intended for personal use:
+do not redistribute it unchanged with the same admin password. Public releases
+would require a dedicated, secure first-boot admin setup.
 
-Wichtig: Die URL-Abfrage richtet kein WLAN ein. Beim eigenen Image vor dem ersten
-Browserstart Ethernet verwenden oder mit `Strg+Alt+F2` als `frameadmin` anmelden und
-das Netzwerk einrichten, z.B. auf einem System mit NetworkManager:
+Important: the URL prompt does not configure Wi-Fi. When using a custom image,
+connect via Ethernet before the first browser start, or press `Ctrl+Alt+F2`,
+sign in as `frameadmin`, and configure the network. For example, on a system
+using NetworkManager:
 
 ```bash
-sudo nmcli --ask device wifi connect 'DEINE-SSID'
+sudo nmcli --ask device wifi connect 'YOUR-SSID'
 ```
 
-Bei einem eigenen Image ist die OS-Anpassung im Imager nicht immer verfuegbar.
-SSH laesst sich bei Bedarf mit `sudo raspi-config` aktivieren. Wenn Chromium bereits
-eine Netzwerkfehlerseite zeigt, nach erfolgreicher Netzwerkeinrichtung die Sitzung mit
-`sudo systemctl restart getty@tty1.service` neu starten. Eine automatische Erkennung
-spaeterer Ausfaelle des Zielservers oder eine automatische Seitenaktualisierung ist nicht enthalten.
+OS customization in Imager is not always available for custom images. SSH can be
+enabled with `sudo raspi-config` if needed. If Chromium is already showing a network
+error page, restart the session after successfully configuring the network using
+`sudo systemctl restart getty@tty1.service`. Automatic detection of later target
+server outages and automatic page refresh are not included.
 
-## Grenzen und Wartung
+## Tested Setup and Wi-Fi Note
 
-Projektdateien auf dem Pi aktualisieren und den Installer erneut ausfuehren:
+Successfully tested on a **Raspberry Pi 3A+ running Raspberry Pi OS Lite Trixie**.
+The only issue observed in this setup was Wi-Fi connectivity, which was resolved
+by restricting the saved Wi-Fi connection to **2.4 GHz** instead of allowing
+automatic band selection. This is a workaround for this tested setup, not a
+guaranteed fix for every Wi-Fi issue.
+
+On systems using NetworkManager, first list the saved connection profiles:
+
+```bash
+nmcli -f NAME,TYPE,DEVICE connection show
+```
+
+Replace `YOUR-WIFI-CONNECTION` with the Wi-Fi **profile name** from that list
+(which may differ from the SSID), then set the band and reconnect:
+
+```bash
+WIFI_CONNECTION='YOUR-WIFI-CONNECTION'
+sudo nmcli connection modify "$WIFI_CONNECTION" 802-11-wireless.band bg
+sudo nmcli connection up "$WIFI_CONNECTION"
+```
+
+NetworkManager uses `bg` for the 2.4 GHz band. The setting is saved in the profile
+and persists across reboots. Your access point must provide a 2.4 GHz network.
+Reconnecting may interrupt an SSH session; preferably run these commands locally
+after pressing `Ctrl+Alt+F2` and signing in as the admin user.
+
+To allow automatic band selection again:
+
+```bash
+sudo nmcli connection modify "$WIFI_CONNECTION" 802-11-wireless.band ""
+sudo nmcli connection up "$WIFI_CONNECTION"
+```
+
+For this last example, keep `WIFI_CONNECTION` set to the same profile name.
+
+## Limitations and Maintenance
+
+Update the project files on the Pi and run the installer again:
 
 ```bash
 cd "$HOME/img-frame"
@@ -173,20 +214,20 @@ sudo bash install.sh
 sudo reboot
 ```
 
-Die gespeicherte URL und das Browserprofil bleiben erhalten. Bei eigenen lokalen
-Aenderungen diese vor dem Update pruefen; `--ff-only` verhindert automatische
-Merge-Commits und ueberschreibt keine lokalen Aenderungen. Ein bereits gebautes
-SD-Karten-Image wird dadurch nicht aktualisiert; dafuer einen neuen Build vorbereiten.
+The saved URL and browser profile are preserved. Review any local changes before
+updating; `--ff-only` prevents automatic merge commits and does not overwrite local
+changes. This does not update an already built SD card image; prepare a new build
+for that instead.
 
-- Ein echter Boot- und Hardwaretest auf Zero 2 W und neueren Modellen steht noch aus.
-  Auch die kompletten pi-gen-Builds fuer 32 und 64 Bit muessen auf Linux verifiziert werden.
-- Das Kiosk-Vollbild ist keine Absicherung gegen Benutzer mit physischem Zugriff.
-  Konsolenwechsel und Wartung bleiben absichtlich moeglich.
-- KMS bleibt aktiv. Keine pauschalen Legacy-/FKMS-Overlays, keine feste Bildschirmaufloesung.
-  Display-Drehung und Sensorsteuerung sind nicht Bestandteil dieser Basis.
-- Bei HTTPS muessen Zertifikate vertrauenswuerdig sein; die Zertifikatspruefung wird nicht abgeschaltet.
-- Chromium-Sitzungsdaten und Tokens sind auf der SD-Karte gespeichert. Geraet und Karte schuetzen.
-- Betriebssystem und Browser regelmaessig aktualisieren:
+- Boot and hardware tests on the Zero 2 W and other models are still pending.
+  Complete pi-gen builds for both 32-bit and 64-bit must also be verified on Linux.
+- Fullscreen kiosk mode does not protect against users with physical access.
+  Console switching and maintenance remain intentionally available.
+- KMS remains enabled. No blanket legacy/FKMS overlays or fixed screen resolution
+  are configured. Display rotation and sensor control are not part of this base setup.
+- HTTPS requires trusted certificates; certificate validation is not disabled.
+- Chromium session data and tokens are stored on the SD card. Protect both the device and the card.
+- Update the operating system and browser regularly:
 
   ```bash
   sudo apt update
@@ -202,7 +243,8 @@ bash tests/test_prepare.sh
 bash -n install.sh files/launch.sh files/session.sh image/prepare.sh
 ```
 
-Die Python-Tests pruefen URL-Validierung, Erstabfrage, dauerhafte Speicherung,
-Adresswechsel und die Reparatur beschaedigter Konfigurationen. Die Shell-Tests pruefen
-beide Zielarchitekturen, die automatische Auswahl und Fehlerfaelle mit simulierten
-`git`-/`dpkg`-Befehlen, ohne Download oder Image-Build. Sie ersetzen keinen Pi-Test.
+The Python tests cover URL validation, the first-start prompt, persistent storage,
+URL changes, and recovery from corrupted configuration files. The shell tests cover
+both target architectures, automatic selection, and error cases using simulated
+`git` and `dpkg` commands, without downloading anything or building an image.
+These tests do not replace testing on a Pi.
